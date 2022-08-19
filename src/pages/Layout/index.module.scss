@@ -1,0 +1,35 @@
+.layout {
+  height: 100vh;
+  :global {
+    .logo {
+      float: left;
+      width: 200px;
+      height: 60px;
+      background: url(~assets/images/logo.png);
+      background-size: cover;
+    }
+    .profile {
+      color: #fff;
+      font-weight: 700px;
+      position: absolute;
+      right: 20px;
+      span + span {
+        //SPAN's siblings span
+        margin-left: 20px;
+        cursor: pointer; //小手的效果
+      }
+    }
+    .ant-layout-header {
+      padding: 0;
+      position: relative;
+    }
+    .ant-row-rtl .logo {
+      float: right;
+      margin: 16px 0 16px 24px;
+    }
+
+    .site-layout-background {
+      background: #fff;
+    }
+  }
+}

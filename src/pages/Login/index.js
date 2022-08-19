@@ -1,13 +1,16 @@
 import React, { Component } from 'react'
 import { Card, Button, Checkbox, Form, Input, message } from 'antd'
 import logo from 'assets/images/logo.png'
-import './index.scss'
+import styles from './index.module.scss'
 import { login } from 'api/user'
+import { setToken } from 'utils/storage'
+
 // import request from 'utils/request'
+
 export default class Login extends Component {
   render() {
     return (
-      <div className="loginDiv">
+      <div className={styles.loginDiv}>
         <Card className="loginCard">
           <img className="loginlogo" src={logo} alt="" />
           <Form
@@ -96,13 +99,16 @@ export default class Login extends Component {
   onFinish = async ({ mobile, code }) => {
     try {
       const res = await login(mobile, code)
-      console.log(res)
-
       message.success('successful login', 1, () => {
-        localStorage.setItem('token', res.data.token)
-
-        console.log(typeof this.props.history)
-        this.props.history.push('/home')
+        // localStorage.setItem('token', res.data.token)
+        setToken(res.data.token)
+        //判断location.state中是否有值
+        const { state } = this.props.location
+        if (state) {
+          this.props.history.push(state.from)
+        } else {
+          this.props.history.push('/home')
+        }
       })
     } catch (error) {
       message.warning(error.response.data.message, 1)
