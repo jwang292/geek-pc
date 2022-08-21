@@ -8,74 +8,79 @@ import {
   Select,
   DatePicker,
   Table,
+  Space,
+  Tag,
 } from 'antd'
 import styles from './index.module.scss'
 import { Link } from 'react-router-dom'
 import { ArticleStatus } from 'api/constance'
 import { getChannels } from 'api/channel'
 import { getArticles } from 'api/article'
+import defaultImg from 'assets/images/defaultImage.png'
 const { Option } = Select
 export default class ArticleList extends Component {
-  state = {
-    channels: [],
-  }
-  dataSource = [
-    {
-      key: '1',
-      name: 'this.data.results.title',
-      age: 32,
-      address: '西湖区湖底公园1号',
-    },
-    {
-      key: '2',
-      name: '胡彦祖',
-      age: 42,
-      address: '西湖区湖底公园1号',
-    },
-  ]
   columns = [
     {
-      title: 'Picture',
-      dataIndex: 'name',
-      key: 'name',
+      title: 'Cover',
+
+      render(data) {
+        if (data.cover.type === 0) {
+          //no image
+          return (
+            <img
+              src={defaultImg}
+              alt=""
+              style={{ width: 200, height: 120, objectFit: 'cover' }}
+            />
+          )
+        } else {
+          return (
+            <img
+              src={data.cover.images[0]}
+              alt=""
+              style={{ width: 200, height: 120, objectFit: 'cover' }}
+            />
+          )
+        }
+      },
     },
     {
-      title: 'Titel',
-      dataIndex: 'age',
-      key: 'age',
+      title: 'Title',
+      dataIndex: 'title',
     },
     {
       title: 'Status',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'status',
     },
     {
-      title: 'Posttime',
-      dataIndex: 'address',
-      key: 'address',
+      title: 'PostTime',
+      dataIndex: 'pubdate',
     },
     {
-      title: 'read',
-      dataIndex: 'address',
-      key: 'address',
+      title: 'Read',
+      dataIndex: 'read_count',
     },
     {
       title: 'Comments',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'comment_count',
     },
     {
       title: 'Likes',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'like_count',
     },
     {
       title: 'Edit',
-      dataIndex: 'address',
-      key: 'address',
+      dataIndex: 'age',
     },
   ]
+
+  state = {
+    channels: [],
+    articles: {},
+  }
+
   render() {
+    const { results, total_count } = this.state.articles
     return (
       <div className={styles.root}>
         <Card
@@ -121,13 +126,13 @@ export default class ArticleList extends Component {
             </Form.Item>
           </Form>
         </Card>
-        <Card title="There is xxx result">
-          <Table dataSource={this.dataSource} columns={this.columns} />
+        <Card title={`There is ${total_count}result`}>
+          <Table dataSource={results} columns={this.columns} rowKey="id" />
         </Card>
       </div>
     )
   }
-  async componentDidMount() {
+  componentDidMount() {
     this.getChannelsList()
     this.getArticlesList()
   }
@@ -138,6 +143,7 @@ export default class ArticleList extends Component {
 
   async getArticlesList() {
     const res = await getArticles()
+    console.log(res)
     this.setState({
       articles: res.data,
     })
