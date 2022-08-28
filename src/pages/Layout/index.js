@@ -45,7 +45,7 @@ export default class LayoutComponent extends Component {
                 mode="inline"
                 defaultSelectedKeys={[this.props.location.pathname]}
                 style={{
-                  height: '100%',
+                  height: '100vh',
                   borderRight: 0,
                 }}
                 theme="dark"
@@ -61,7 +61,7 @@ export default class LayoutComponent extends Component {
                 </Menu.Item>
               </Menu>
             </Sider>
-            <Layout style={{ padding: '24px', overflow: 'auto' }}>
+            <Layout style={{ padding: '24px', overflow: 'scroll' }}>
               <Content className="site-layout-background">
                 <Switch>
                   <Route exact path="/home" component={Home}></Route>

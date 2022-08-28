@@ -2,8 +2,9 @@ import { message } from 'antd'
 import axios from 'axios'
 import { getToken, removeToken } from './storage'
 import history from './history'
+export const baseURL = 'http://geek.itheima.net/v1_0/'
 const instance = axios.create({
-  baseURL: 'http://geek.itheima.net/v1_0/',
+  baseURL,
   timeout: 5000,
 })
 
@@ -31,10 +32,15 @@ instance.interceptors.response.use(
     return response.data
   },
   function (error) {
+    //网络超时
+    if (!error.response) {
+      message.error('The Internet busy, please waiting')
+      return Promise.reject('The Internet busy, please waiting')
+    }
     // 对响应错误做点什么
     //token过期的统一处理
-    console.log(error.response)
-    if (error.request.status == 401) {
+    // console.log(error.response)
+    if (error.request.status === 401) {
       removeToken()
       message.warn('token is expired')
       //非组件中无法使用Redirect or history
