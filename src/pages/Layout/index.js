@@ -18,6 +18,7 @@ const { Header, Content, Sider } = Layout
 export default class LayoutComponent extends Component {
   state = {
     profile: {},
+    selectedKey: this.props.location.pathname,
   }
   render() {
     return (
@@ -43,7 +44,8 @@ export default class LayoutComponent extends Component {
             <Sider width={200} className="site-layout-background">
               <Menu
                 mode="inline"
-                defaultSelectedKeys={[this.props.location.pathname]}
+                // 如果默认高亮用defaultSelectedKey ,会变就用selectedKey
+                selectedKeys={[this.state.selectedKey]}
                 style={{
                   height: '100vh',
                   borderRight: 0,
@@ -67,9 +69,19 @@ export default class LayoutComponent extends Component {
                   <Route exact path="/home" component={Home}></Route>
                   <Route path="/home/list" component={ArticleList}></Route>
                   <Route
+                    // add Route
+                    exact
                     path="/home/publish"
                     component={ArticlePublish}
+                    key="add"
                   ></Route>
+                  <Route
+                    path="/home/publish/:id"
+                    component={ArticlePublish}
+                    key="edit"
+                  >
+                    {/* edit route  */}
+                  </Route>
                 </Switch>
               </Content>
             </Layout>
@@ -78,6 +90,21 @@ export default class LayoutComponent extends Component {
       </div>
     )
   }
+  //组件更新的hook function  (包括router 变化)
+  componentDidUpdate(prevProps) {
+    //判断是否是URL地址变化，否则死循环
+    // prevProps :上一次的props
+    let pathname = this.props.location.pathname
+    if (this.props.location.pathname !== prevProps.location.pathname) {
+      if (pathname.startsWith('/home/publish')) {
+        pathname = '/home/publish'
+      }
+      this.setState({
+        selectedKey: pathname,
+      })
+    }
+  }
+
   async componentDidMount() {
     const res = await getUserInfo()
     this.setState({

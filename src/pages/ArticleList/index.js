@@ -90,6 +90,7 @@ export default class ArticleList extends Component {
               type="primary"
               shape="circle"
               icon={<EditOutlined />}
+              onClick={() => this.handleEdit(data.id)}
             ></Button>
             <Button
               type="primary"
@@ -241,5 +242,7 @@ export default class ArticleList extends Component {
       },
     })
   }
-  handleChange = () => {}
+  handleEdit = (id) => {
+    this.props.history.push(`/home/publish/${id}`)
+  }
 }

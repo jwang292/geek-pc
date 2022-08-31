@@ -19,15 +19,18 @@ import 'react-quill/dist/quill.snow.css'
 import { PlusOutlined } from '@ant-design/icons'
 import { baseURL } from 'utils/request'
 import { addArticle } from 'api/article'
+import { getArticleById } from 'api/article'
 export default class ArticlePublish extends Component {
   state = {
     type: 1,
     fileList: [],
     showPreview: false,
     previewUrl: '',
+    id: this.props.match.params.id,
   }
+  formRef = React.createRef()
   render() {
-    const { previewUrl, showPreview } = this.state
+    const { previewUrl, showPreview, id } = this.state
     return (
       <div className={styles.root}>
         <Card
@@ -36,11 +39,12 @@ export default class ArticlePublish extends Component {
               <Breadcrumb.Item>
                 <Link to="/home">Home</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Publish Article</Breadcrumb.Item>
+              <Breadcrumb.Item>{id ? 'edit' : 'publish'}</Breadcrumb.Item>
             </Breadcrumb>
           }
         >
           <Form
+            ref={this.formRef}
             labelCol={{ span: 1 }}
             wrapperCol={{ offset: 2 }}
             size="large"
@@ -100,10 +104,10 @@ export default class ArticlePublish extends Component {
               <Space>
                 {' '}
                 <Button type="primary" htmlType="submit" size="large">
-                  submit
+                  {id ? 'edit' : 'publish'}
                 </Button>
-                <Button type="primary" size="large">
-                  saving
+                <Button type="primary" size="large" onClick={this.addDraft}>
+                  saving to draft
                 </Button>
               </Space>
             </Form.Item>
@@ -120,23 +124,65 @@ export default class ArticlePublish extends Component {
       </div>
     )
   }
-  onFinish = async (values) => {
-    const { fileList, type } = this.state
-    if (fileList.length !== type) {
-      return message.warn('the number of picture is wrong')
+
+  async componentDidMount() {
+    if (this.state.id) {
+      //发请求，获取文章信息
+      const res = await getArticleById(this.state.id)
+      const values = {
+        ...res.data,
+        type: res.data.cover.type,
+      }
+      //设置表单values
+      this.formRef.current.setFieldsValue(values)
+      const fileList = res.data.cover.images.map((item) => {
+        return { url: item }
+        //回显图片
+      })
+      this.setState({
+        fileList,
+      })
     }
+  }
+
+  async save(values, draft) {
+    const { fileList, type } = this.state
+    // if (fileList.length !== type) {
+    //   return message.warn('the number of picture is wrong')
+    // }
     const images = fileList.map((item) => {
       return item.url || item.response.data.url
     })
-    await addArticle({
-      ...values,
-      cover: {
-        type,
-        images,
+    await addArticle(
+      {
+        ...values,
+        cover: {
+          type,
+          images,
+        },
       },
-    })
+      draft
+    )
     message.success('add success')
     this.props.history.push('/home/list')
+  }
+
+  onFinish = async (values) => {
+    // const { fileList, type } = this.state
+    // if (fileList.length !== type) {
+    //   return message.warn('the number of picture is wrong')
+    // }
+    // const images = fileList.map((item) => {
+    //   return item.url || item.response.data.url
+    // })
+    // await addArticle({
+    //   ...values,
+    //   cover: {
+    //     type,
+    //     images,
+    //   },
+    // })
+    this.save(values, false)
   }
   changeType = (e) => {
     this.setState({
@@ -149,6 +195,11 @@ export default class ArticlePublish extends Component {
     this.setState({
       fileList,
     })
+  }
+  // 添加草稿
+  addDraft = async () => {
+    const values = await this.formRef.current.validateFields()
+    this.save(values, true)
   }
   //上传前的校验
   beforeUpload = (file) => {
